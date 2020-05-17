@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Arg, Ctx } from "type-graphql";
+import { Resolver, Mutation, Arg } from "type-graphql";
 
 import { User } from "./../../entity/User";
 import { redis } from "./../../redis";

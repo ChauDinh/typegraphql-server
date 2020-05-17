@@ -7,6 +7,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
 
+import { ConfirmUserResolver } from "./modules/user/ConfirmUser";
 import { RegisterResolver } from "./modules/user/Register";
 import { LoginResolver } from "./modules/user/Login";
 import { MeResolver } from "./modules/user/Me";
@@ -14,12 +15,17 @@ import { redis } from "./redis";
 
 const PORT = process.env.PORT || 4000;
 
-(async function main() {
+const main = async () => {
   // Create connection to database
   await createConnection();
 
   const schema = await buildSchema({
-    resolvers: [MeResolver, RegisterResolver, LoginResolver],
+    resolvers: [
+      MeResolver,
+      RegisterResolver,
+      LoginResolver,
+      ConfirmUserResolver,
+    ],
   });
   const apolloServer = new ApolloServer({
     schema,
@@ -56,9 +62,11 @@ const PORT = process.env.PORT || 4000;
 
   apolloServer.applyMiddleware({ app });
 
-  app.listen(PORT, () =>
+  app.listen(PORT, () => {
     console.log(
       `🚀 The graphql server is starting at http://localhost:${PORT}/graphql`
-    )
-  );
-})();
+    );
+  });
+};
+
+main();

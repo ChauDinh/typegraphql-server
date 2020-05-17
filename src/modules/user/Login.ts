@@ -26,6 +26,11 @@ export class LoginResolver {
       return null;
     }
 
+    // TODO: Check if the user has not confirmed their email
+    if (!user.confirmed) {
+      return null;
+    }
+
     // TODO: Access the context and send user back a cookie
     ctx.req.session!.userId = user.id;
 

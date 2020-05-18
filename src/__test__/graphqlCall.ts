@@ -6,11 +6,16 @@ import Maybe from "graphql/tsutils/Maybe";
 interface Options {
   source: string;
   variableValues?: Maybe<{ [key: string]: any }>;
+  userId?: number;
 }
 
 let schema: GraphQLSchema;
 
-export const grapqhlCall = async ({ source, variableValues }: Options) => {
+export const grapqhlCall = async ({
+  source,
+  variableValues,
+  userId,
+}: Options) => {
   if (!schema) {
     schema = await createSchema();
   }
@@ -18,5 +23,13 @@ export const grapqhlCall = async ({ source, variableValues }: Options) => {
     schema,
     source,
     variableValues,
+    contextValue: {
+      req: {
+        session: { userId },
+      },
+      res: {
+        clearCookie: jest.fn(),
+      },
+    },
   });
 };

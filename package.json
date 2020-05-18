@@ -30,16 +30,21 @@
     "@types/express-session": "^1.17.0",
     "@types/graphql": "^14.5.0",
     "@types/ioredis": "^4.16.2",
+    "@types/jest": "^25.2.2",
     "@types/node": "^14.0.1",
     "@types/nodemailer": "^6.4.0",
     "@types/uuid": "^7.0.3",
+    "jest": "^26.0.1",
     "nodemon": "^2.0.4",
+    "ts-jest": "^26.0.0",
     "ts-node": "^8.10.1",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.9.2"
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "dev": "ts-node-dev --respawn src/index.ts"
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "test:setup": "ts-node src/__test__/setup.ts",
+    "test:run": "yarn test:setup && jest"
   }
 }

@@ -28,12 +28,14 @@
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.6",
     "@types/express-session": "^1.17.0",
+    "@types/faker": "^4.1.12",
     "@types/graphql": "^14.5.0",
     "@types/ioredis": "^4.16.2",
     "@types/jest": "^25.2.2",
     "@types/node": "^14.0.1",
     "@types/nodemailer": "^6.4.0",
     "@types/uuid": "^7.0.3",
+    "faker": "^4.1.0",
     "jest": "^26.0.1",
     "nodemon": "^2.0.4",
     "ts-jest": "^26.0.0",
@@ -45,6 +47,6 @@
     "start": "ts-node src/index.ts",
     "dev": "ts-node-dev --respawn src/index.ts",
     "test:setup": "ts-node src/__test__/setup.ts",
-    "test:run": "yarn test:setup && jest"
+    "test": "yarn test:setup && jest"
   }
 }

@@ -5,6 +5,7 @@ import { createConnection } from "typeorm";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
+import { graphqlUploadExpress } from "graphql-upload";
 
 import { redis } from "./redis";
 import { createSchema } from "./utils/createSchema";
@@ -19,6 +20,7 @@ const main = async () => {
   const apolloServer = new ApolloServer({
     schema,
     context: ({ req, res }: any) => ({ req, res }),
+    uploads: false,
   });
 
   const app = Express();
@@ -48,6 +50,9 @@ const main = async () => {
       },
     })
   );
+
+  // Upload images/files
+  app.use(graphqlUploadExpress({ maxFieldSize: 10000000, maxFiles: 10 }));
 
   apolloServer.applyMiddleware({ app });
 

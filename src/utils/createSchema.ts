@@ -9,6 +9,7 @@ import { LoginResolver } from "../modules/user/login/Login";
 import { ForgotPasswordResolver } from "../modules/user/forgotPassword/ForgotPassword";
 import { ConfirmUserResolver } from "../modules/user/confirm/ConfirmUser";
 import { ChangePasswordResolver } from "../modules/user/changePassword/ChangePassword";
+import { ProfileAvatarResolver } from "../modules/user/register/ProfileAvatar";
 import { buildSchema } from "type-graphql";
 
 export const createSchema = async () =>
@@ -23,6 +24,7 @@ export const createSchema = async () =>
       RegisterResolver,
       CreateUserResolver,
       CreateProductResolver,
+      ProfileAvatarResolver,
     ],
     authChecker: ({ context: { req } }) => {
       return !!req.session.userId;

@@ -1,10 +1,10 @@
 import { v4 } from "uuid";
 import { Resolver, Mutation, Arg } from "type-graphql";
 
-import { User } from "./../../entity/User";
-import { redis } from "./../../redis";
-import { forgotPasswordPrefix } from "./../../constant/redisPrefixes";
-import { sendEmail } from "../../utils/sendMail";
+import { User } from "../../../entity/User";
+import { redis } from "../../../redis";
+import { forgotPasswordPrefix } from "../../../constant/redisPrefixes";
+import { sendEmail } from "../../../utils/sendMail";
 
 @Resolver()
 export class ForgotPasswordResolver {

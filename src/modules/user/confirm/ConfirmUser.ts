@@ -1,8 +1,8 @@
 import { Resolver, Mutation, Arg } from "type-graphql";
 
-import { User } from "./../../entity/User";
-import { redis } from "./../../redis";
-import { confirmUserPrefix } from "./../../constant/redisPrefixes";
+import { User } from "../../../entity/User";
+import { redis } from "../../../redis";
+import { confirmUserPrefix } from "../../../constant/redisPrefixes";
 
 @Resolver()
 export class ConfirmUserResolver {

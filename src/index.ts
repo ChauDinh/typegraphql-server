@@ -6,6 +6,11 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
 import { graphqlUploadExpress } from "graphql-upload";
+import {
+  getComplexity,
+  fieldExtensionsEstimator,
+  simpleEstimator,
+} from "graphql-query-complexity";
 
 import { redis } from "./redis";
 import { createSchema } from "./utils/createSchema";
@@ -21,6 +26,32 @@ const main = async () => {
     schema,
     context: ({ req, res }: any) => ({ req, res }),
     uploads: false,
+    plugins: [
+      {
+        requestDidStart: () => ({
+          didResolveOperation({ request, document }) {
+            const complexity = getComplexity({
+              schema,
+              operationName: request.operationName,
+              query: document,
+              variables: request.variables,
+              estimators: [
+                fieldExtensionsEstimator(),
+
+                simpleEstimator({ defaultComplexity: 1 }),
+              ],
+            });
+
+            if (complexity > 8) {
+              throw new Error(
+                `Sorry, too complicated query! ${complexity} is over 8 that is the max allowed complexity.`
+              );
+            }
+            console.log("Used query complexity points:", complexity);
+          },
+        }),
+      },
+    ],
   });
 
   const app = Express();

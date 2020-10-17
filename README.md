@@ -420,3 +420,15 @@ For more details, we can check the docs of `class-validator`:
 https://github.com/typestack/class-validator#custom-validation-decorators
 
 #### 6. Login mutation
+
+If register is allow user type their information, validate them and store it
+into our database, login is quite a bit more complex. Since we have to check
+user input, validate them and keep user login on every request, until they
+logout or the login session expired.
+
+There two common ways to handle this task, `JWT` and `session-cookie`.
+
+![jwt-cookie](./src/assets/jwt-vs-cookie.jpg)
+
+In this series, we use `session` to handle user login data on every request.
+Actually we store `sessionID` in redis.

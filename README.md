@@ -604,3 +604,28 @@ const schema = await buildSchema({
 
 Here is an example from type-graphql for the authorization with roles:
 https://github.com/MichalLytek/type-graphql/blob/master/examples/authorization/auth-checker.ts
+
+Now there is another way to authorize which, I think, is more flexible than the
+previous method. Particularly we create middleware functions and pass them into
+the `@UseMiddleware` decorator before queries, mutations you want.
+
+```TypeScript
+@UseMiddleware(isAuth)
+@Query()
+hello(): string {
+  return "Hello, World!";
+}
+```
+
+And the `isAuth` middleware can be looked like that:
+
+```TypeScript
+import {MiddlewareFn} from "type-graphql";
+
+export const isAuth: MiddlewareFn<MyContext> = async ({context}, next) => {
+  if !context.req.session!.userId throw new Error("Not authenticated");
+  return next();
+}
+```
+
+The method we can create other middleware like isAdmin, isModerator, etc.

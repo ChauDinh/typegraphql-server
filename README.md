@@ -430,5 +430,139 @@ There two common ways to handle this task, `JWT` and `session-cookie`.
 
 ![jwt-cookie](./src/assets/jwt-vs-cookie.jpg)
 
-In this series, we use `session` to handle user login data on every request.
-Actually we store `sessionID` in redis.
+In the `JWT` token method, there are 3 different parts in a token, the middle
+part is the encrypted data, anyone can see the data. Compared with `session`
+where we have an id (sessionId) stored usually as a cookie in client (browser).
+When client makes a request, they send with the cookie in header and our server
+would look up and check in session data (Redis).
+
+When we scale up later, we may need a `load balancer` to access multiple
+servers and these servers can access to a redis database.
+
+A lot of people would call `JWT` as a stateless, means you don't need to store
+any data in backend, every data is encrypted in the body of the token itself. So
+we don't need to connect multiple servers to our redis since they maybe on
+different cloud, area...When you need to verify `JWT` toke, you can use a
+`SECRET` which you can share easily along servers. However, there are also some
+downsides which means the strength of `session-cookie` method.
+
+If we store our data/sessionId in the server (Redis), it will be more private.
+The other advantage is when we need to store a bunch of data in a token, `JWT`
+maybe not a good choice since it would slow down in each request. On the other
+hands, `session` provides you just an id (maybe `uuid`) which would reduce the
+time sending requests to the server.
+
+There is something I learn from Ben's video:
+https://www.youtube.com/watch?v=o9hT7v0OLJc&t=7s that with `JWT` token, we have
+to wait until the token expire when we need to logout user or incase hacked
+account. Whereas with `session`, we can actually just straight remove the data
+from Redis.
+
+In this series, we use `session` to handle user login data on every request, we
+also have a version for `JWT` in the future.
+
+Back to our series, we use `session-cookie` to store user data when they login
+in Redis database. First, there are some packages we need to install:
+
+```
+yarn add connect-redis express-session ioredis cors
+yarn add -D @types/connect-redis @types/express-session @types/ioredis @types/cors
+```
+
+Now we add session middleware and cors middleware to our server:
+
+```Typescript
+...
+import connectRedis from "connect-redis";
+import session from "express-session";
+
+import {redis} from "./redis";
+
+const app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:3000",
+  })
+);
+
+const RedisStore = connectRedis(session);
+
+app.use(
+    session({
+      store: new RedisStore({
+        client: redis as any, // redis client we create in redis.ts
+      }),
+      name: YOUR_COOKIE_NAME,
+      secret: YOUR_SECRET_KEY,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years, you can set how long you want
+      },
+    })
+  );
+```
+
+and we have a `redis.ts` file to create an instance of Redis (ioredis) for
+client to connect.
+
+```TypeScript
+import Redis from "ioredis";
+
+export const redis = new Redis();
+
+// We can put the connection string in Redis if we don't like the default, incase we leave it as default.
+```
+
+So we've configured the Redis session for user login task, it's time to access
+and send the `sessionId` on every request. To do that, we need to pass it in
+`context` of Apollo Server.
+
+```TypeScript
+const apolloServer = new ApolloServer({
+  schema,
+  formatError: formatArgumentValidationError,
+  context: ({req}: any) => ({req}) // now we can access the object Request in all of our resolvers
+})
+```
+
+Ok, now let create `login.ts` file to handle user login task. At the starting
+point, you can copy/reference the file we create for register.
+
+```TypeScript
+@Resolver()
+class LoginResolver {
+  @Mutation(() => User, {nullable: true})
+  async login(
+    @Arg("email") email: string,
+    @Arg("password") password: string
+    @Ctx() ctx: MyContext // MyContext is the type we create for the context.
+  ): Promise<User> {
+    const user = await User.findOne({where: {email}});
+
+    if (!user) return null;
+
+    const isValid = await bcrypt.compare(password, user.password);
+
+    if (!isValid) return null;
+
+    ctx.req.session!.userId = user.id;
+
+    return user;
+  }
+}
+```
+
+And don't forget to add `LoginResolver` into the Apollo Server in `index.ts`
+file. Now you can go to the GraphQL Playground to check the login resolver,
+however, you need to switch the `request.credentials` into `include` instead of
+`omit`. If you see your session appears in the cookie browser, you're
+successful.
+
+#### 7. Authorization
+
+The authorization answers the question what client can do in our system. We can
+authorize by using rules like "ADMIN", "MODERATOR", "MEMBER", etc which depends
+on your application business. In this series, we

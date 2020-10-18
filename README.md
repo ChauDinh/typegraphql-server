@@ -4,13 +4,14 @@
 2. Register mutation
 3. Validation input
 4. Login mutation
-5. Authorization/Middleware
-6. Confirming email
-7. Forgot/change password
-8. Logout mutation
-9. Testing with Jest
-10. Higher order resolvers
-11. updating...
+5. Authorization/Middleware (basic)
+6. Authorization (with roles)
+7. Confirming email
+8. Forgot/change password
+9. Logout mutation
+10. Testing with Jest
+11. Higher order resolvers
+12. updating...
 
 ## TypeGraphQL setup
 
@@ -19,7 +20,17 @@
 We use `yarn` for the project, so to start (initialize) you need to install
 `yarn` and then create the project folder `mkdir typegraphql-server && cd typegraphql-server`.
 
-Next, we need to install `express`, a Node.js framework for building server.
+Next, we need to install `express`, a Node.js framework for building server. We also
+use `Apollo` libraries for writing GraphQL. Actually we use `Apollo Client`
+library which support TypeScript and `Apollo Server` which is a tool to build an
+API (Gateway) in Node.js
+
+![Apollo Server](./src/assets/apollo-server.png)
+
+`Apollo Client` is a tool helps you write GraphQL requests in frontend. In
+particular, we can write our queries, mutations as a part of the UI component
+(React, React Native, Angular, Vue). Another advantage is `Apollo Client` supports state management, which
+comes in very useful in big applications.
 
 ```
 yarn add apollo-server-express express graphql reflect-metadata type-graphql
@@ -565,4 +576,31 @@ successful.
 
 The authorization answers the question what client can do in our system. We can
 authorize by using rules like "ADMIN", "MODERATOR", "MEMBER", etc which depends
-on your application business. In this series, we
+on your application business. In this series, we use a basic role: "USER" which
+means the logged in users.
+
+First, we use the `@Authorize` decorator for the field, query or mutation we
+want to authorize. Here is an example:
+
+```TypeScript
+@Authorized()
+@Query()
+hello(): string {
+  return "hello, world"
+}
+```
+
+Next we need to create an auth checker function, again the roles are depends on
+business logic, so we just demo the very basic example:
+
+```TypeScript
+const schema = await buildSchema({
+  resolvers: [MyResolver],
+  authChecker: ({root, args, context: {req}, info}, roles) => {
+    return !!req.session.userId;
+  }
+})
+```
+
+Here is an example from type-graphql for the authorization with roles:
+https://github.com/MichalLytek/type-graphql/blob/master/examples/authorization/auth-checker.ts

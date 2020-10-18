@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg, UseMiddleware } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, UseMiddleware, Authorized } from "type-graphql";
 import bcrypt from "bcryptjs";
 
 import { User } from "../../../entity/User";
@@ -10,6 +10,7 @@ import { sendEmail } from "../../../utils/sendMail";
 @Resolver()
 export class RegisterResolver {
   @UseMiddleware(isAuth)
+  @Authorized()
   @Query(() => String, {
     nullable: true,
     description: "hello world query for testing",

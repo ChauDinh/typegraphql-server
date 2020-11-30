@@ -629,3 +629,9 @@ export const isAuth: MiddlewareFn<MyContext> = async ({context}, next) => {
 ```
 
 The method we can create other middleware like isAdmin, isModerator, etc.
+
+#### 8. Confirm Email
+
+In some systems, when user finish register, we send them an email to confirm the
+account before they can actually log in. To do this, we have a field in the
+`User` entity which contains
